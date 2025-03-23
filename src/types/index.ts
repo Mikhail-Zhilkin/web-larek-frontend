@@ -28,10 +28,6 @@ export interface IOrder{
 
 export interface IOrderData {
     order: IOrder;
-    // setPayment(payment: string): void;
-    // setAddress(address: string): void;
-    // setEmail(email: string): void;
-    // setPhone(phone: string): void;
     validatedOrder(): boolean;
     setOrderField(field: keyof IOrder, value: IOrder[keyof IOrder]): void;
     clearOrder(): void;
