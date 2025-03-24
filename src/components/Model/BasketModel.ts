@@ -35,7 +35,7 @@ export class BasketModel implements IBasketData {
         return this._products.length
     }
 
-    toggleButtonStatus(product: TBasketItem) {
+    getButtonText(product: TBasketItem) {
         const isPriceInvalid = product.price === null;
       
         if (isPriceInvalid) {
@@ -46,14 +46,9 @@ export class BasketModel implements IBasketData {
         return isProductInBasket ? 'Убрать' : 'Купить';
       }
 
-    makeAnOrder(order: IOrderData) {
-        order.setOrderField('items', this._products.map((item) => item.id));
-        order.setOrderField('total', this.getTotalPrice());
-    }
-
     getTotalPrice(): number {
         let totalPrice = 0;
-        this._products.map((item) => totalPrice += item.price);
+        this._products.forEach((item) => totalPrice += item.price);
         return totalPrice;
     }
       

@@ -14,27 +14,29 @@ export class OrderView extends FormView<TOrder> {
         this._uponReceiptButton = container.querySelector('button[name="cash"]');
         this._deliveryAddress = container.querySelector('input[name="address"]');
 
-        this._onlineButton.addEventListener('click', () => {
-            events.emit('order:changed', {
-                payment: this._onlineButton.name
+        if(this._onlineButton) {
+            this._onlineButton.addEventListener('click', () => {
+                this._onlineButton.classList.add('button_alt-active');
+                this._uponReceiptButton.classList.remove('button_alt-active');
+                this.onInputChange('payment', 'card');
             })
-        });
+        }
 
-        this._uponReceiptButton.addEventListener('click', () => {
-            events.emit('order:changed', {
-                payment: this._uponReceiptButton.name
+        if(this._uponReceiptButton) {
+            this._uponReceiptButton.addEventListener('click', () => {
+                this._uponReceiptButton.classList.add('button_alt-active');
+                this._onlineButton.classList.remove('button_alt-active');
+                this.onInputChange('payment', 'cash');
             })
-        });
+        }
     }
 
-    set payment(value: string) {
-        const buttons = [this._onlineButton, this._uponReceiptButton];
-        buttons.forEach((item) => {
-            this.toggleClass(item, 'button_alt-active', item.name === value)
-        })
-    };
-
-    set deliveryAddress(value: string) {
+    set address(value: string) {
         (this.container.elements.namedItem('address') as HTMLInputElement).value = value
+    }
+
+    resetPayment() {
+        this._uponReceiptButton.classList.remove('button_alt-active');
+        this._onlineButton.classList.remove('button_alt-active');
     }
 }

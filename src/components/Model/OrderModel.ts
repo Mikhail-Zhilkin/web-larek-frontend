@@ -2,13 +2,11 @@ import { IOrderData, IOrder, TFormErrors, TOrderForm } from "../../types";
 import { IEvents } from "../base/events";
 
 export class OrderModel implements IOrderData {
-    protected _order: IOrder = {
-        items: [],
+    protected _order: Partial<IOrder> = {
         payment: '',
         address: '',
         email: '',
-        phone: '',
-        total: 0
+        phone: ''
     }
     protected _formErrors: TFormErrors
 
@@ -41,18 +39,27 @@ export class OrderModel implements IOrderData {
         this.validatedOrder()
     }
 
-    get order(): IOrder {
+    createOrderToPost(items: string[], total: number):IOrder {
+        return {
+            items,
+            total,
+            payment: this._order.payment,
+            address: this._order.address,
+            email: this._order.email,
+            phone: this._order.phone
+        }
+    }
+
+    get order(): Partial<IOrder> {
         return this._order
     }
-    
+
     clearOrder() {
         this._order = {
-            items: [],
             payment: '',
             address: '',
             email: '',
-            phone: '',
-            total: 0
+            phone: ''
         }
     }
 }

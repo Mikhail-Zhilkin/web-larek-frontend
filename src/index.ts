@@ -58,16 +58,16 @@ events.on('preview:changed', (product: IProduct) => {
     const cardInstant = new ProductView(cloneTemplate(cardPreviewTemplate), {
         onClick: () => {
             events.emit('preview:changed', product);
-            events.emit('product:basket', product);
+            events.emit('product:addToBasket', product);
             modal.close();
     }
 });
 
-    modal.render({content: cardInstant.render({...product, cardButtonText: basketModel.toggleButtonStatus(product)})})
+    modal.render({content: cardInstant.render({...product, cardButtonText: basketModel.getButtonText(product)})})
 
 });
 
-events.on('product:basket', (product: TBasketItem) => {
+events.on('product:addToBasket', (product: TBasketItem) => {
     basketModel.addProduct(product);
 });
 
@@ -97,9 +97,9 @@ events.on('basket:changed', () => {
 
 events.on('order:open', () => {
     modal.render({content: order.render({
-        payment: '',
-        address: '',
-        valid: false,
+        payment: orderModel.order.payment,
+        address: orderModel.order.address,
+        valid: orderModel.order.payment && orderModel.order.address ? true : false,
         errors: []
     })});
 });
@@ -107,12 +107,6 @@ events.on('order:open', () => {
 events.on(/^order\..*:changed/, (data: {field: keyof TOrderForm, value: string}) => {
     orderModel.setOrderField(data.field, data.value)
 })
-
-events.on('order:changed', (orderData: IOrder) => {
-    orderModel.setOrderField('payment', orderData.payment);
-    order.payment = orderData.payment;
-    orderModel.validatedOrder();
-});
 
 events.on('formErrors:changed', (errors: Partial<TOrderForm>) => {
     const {payment, address, email, phone} = errors;
@@ -124,29 +118,35 @@ events.on('formErrors:changed', (errors: Partial<TOrderForm>) => {
 
 events.on('order:submit', () => {
     modal.render({content: contacts.render({
-        phone: '',
-        email: '',
-        valid: false,
-        errors: [],
+        phone: orderModel.order.phone,
+        email: orderModel.order.email,
+        valid: orderModel.validatedOrder(),
+        errors: []
     })})
 })
 
 events.on('contacts:submit', () => {
-    basketModel.makeAnOrder(orderModel);  
+    const items = basketModel.products.map(item => item.id);
+    const total = basketModel.getTotalPrice();
+
+    if(orderModel.validatedOrder()) {
+        const orderToPost = orderModel.createOrderToPost(items, total)
     
-    api.orderProducts(orderModel.order)
-        .then((res) => {
-            const success = new SuccessView(cloneTemplate(successTemplate), {
-                onClick: () => {
-                    modal.close()
-                }
+        api.orderProducts(orderToPost)
+            .then((res) => {
+                const success = new SuccessView(cloneTemplate(successTemplate), {
+                    onClick: () => {
+                        modal.close()
+                    }
+                })
+
+                modal.render({content: success.render({total: res.total})})
+
+                basketModel.clearBusket();
+                orderModel.clearOrder();
+                order.resetPayment();
             })
-
-            modal.render({content: success.render({total: res.total})})
-
-            basketModel.clearBusket();
-            orderModel.clearOrder();
-        })
-        .catch((err) => console.log(err))
+            .catch((err) => console.log(err))
+    };
 });
 

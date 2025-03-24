@@ -94,7 +94,8 @@ interface IProductData {
 
 ```
 interface IOrderData {
-    order: IOrder;
+    order: Partial<IOrder>;
+    createOrderToPost(items: string[], total: number): IOrder;
     validatedOrder(): boolean;
     setOrderField(field: keyof IOrder, value: IOrder[keyof IOrder]): void;
     clearOrder(): void;
@@ -109,9 +110,8 @@ export interface IBasketData {
     deleteProduct(product: TBasketItem): void;
     clearBusket(): void;
     getBusketItems(): number;
-    toggleButtonStatus(product: TBasketItem): string;
+    getButtonText(product: TBasketItem): string;
     getTotalPrice(): number;
-    makeAnOrder(order: IOrderData): void;
 }
 ```
 
@@ -204,8 +204,7 @@ export type TContacts = Pick<IOrder, 'email' | 'phone'>
 - **deleteProduct(product: TBasketItem): void** - удаляет товар из корзины
 - **clearBusket(): void** - очищает корзину
 - **getBusketItems(): number** - получает размер массива товаров, которые находятся в корзине
-- **toggleButtonStatus(product: TBasketItem): string** - меняет статус кнопки, в зависимости от цены и от того, был ли уже добавлен товар в корзину
-- **makeAnOrder(order: IOrderData): void** - заполняет поля заказа данными товара
+- **getButtonText(product: TBasketItem): string** - меняет статус кнопки, в зависимости от цены и от того, был ли уже добавлен товар в корзину
 - **getTotalPrice(): number** - получает общую сумму товаров в корзине
 - А также **геттер** для получения данных из поля класса
 
@@ -213,16 +212,15 @@ export type TContacts = Pick<IOrder, 'email' | 'phone'>
 Класс отвечает за хранение и логику работы с данными заказа.\
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
-- **_order: IOrder = {
-        items: [],
+- **_order: Partial<IOrder> = {
         payment: '',
         address: '',
         email: '',
-        phone: '',
-        total: 0
+        phone: ''
     }** - объект заказа
 
 Методы класса:
+- **createOrderToPost(items: string[], total: number): IOrder** - создает объект заказа для дальнейшей отправки его на сервер
 - **validatedOrder(): boolean** - отвечает за валидацию полей формы заказа
 - **setOrderField(field: keyof IOrder, value: IOrder[keyof IOrder]): void** - устанавливает значение в переданное поле формы заказа
 - **clearOrder(): void** - очищает заказ
@@ -287,8 +285,8 @@ export type TContacts = Pick<IOrder, 'email' | 'phone'>
 Поля класса содержат элементы данной формы.
 
 Методы класса:
-- **set payment(value: string)** - в зависимости от выбранного способа оплаты, делает кнопку активной устанавливая ей соответствующий класс
-- **set deliveryAddress(value: string)** - устанавливает значение в поле класса
+- **set address(value: string)** - устанавливает значение в поле класса
+- **resetPayment()** - сбрасывает выбранный метод оплаты после оформления заказа
 
 #### Класс **ContactsView**
 Класс отвечает за отображение формы заполнения электронной почты и номера телефона покупателя. 
@@ -318,7 +316,7 @@ export type TContacts = Pick<IOrder, 'email' | 'phone'>
 - `products:changed` - изменение данных товара
 - `product:selected` - запись id товара для дальнейшего открытия подробной информации о товаре
 - `preview:changed` - изменение отображения товара
-- `product:basket` - товар добавлен в корзину
+- `product:addToBasket` - товар добавлен в корзину
 - `basket:open` - открыть корзину
 - `modal:open` - открыть иодальное окно
 - `modal:close` - закрыть модальное окно

@@ -23,11 +23,11 @@ export interface IOrder{
     address: string;
     email: string;
     phone: string;
-    
 }
 
 export interface IOrderData {
-    order: IOrder;
+    order: Partial<IOrder>;
+    createOrderToPost(items: string[], total: number): IOrder;
     validatedOrder(): boolean;
     setOrderField(field: keyof IOrder, value: IOrder[keyof IOrder]): void;
     clearOrder(): void;
@@ -46,9 +46,8 @@ export interface IBasketData {
     deleteProduct(product: TBasketItem): void;
     clearBusket(): void;
     getBusketItems(): number;
-    toggleButtonStatus(product: TBasketItem): string;
+    getButtonText(product: TBasketItem): string;
     getTotalPrice(): number;
-    makeAnOrder(order: IOrderData): void;
 }
 
 export interface IValidation {
